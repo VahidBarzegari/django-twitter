@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+
+{% if post.user.id == request.user.id %}
+    <a href="{% url 'contents:update' post.id %}">{% trans "Update" %}</a>
+{% endif %}
+
+<h2>{{ post.title }}</h2><hr/>
+<p>{{ post.user.username }}</p>
+<p>{{ post.text }}</p><hr/>
+
+{% if request.user.is_authenticated %}
+    <form id="new-comment">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+    </form>
+    <button onclick="SendComment('{{ post.get_url }}')">{% trans "Send" %}</button>
+{% endif %}
+
+    <div id="comments">
+        {% for comment in comments %}
+            <div class="card bg-dark text-white">
+                <p class="card-header">{{ comment.user }}</p>
+                <p class="card-body">{{ comment.text }}</p>
+            </div><br/>
+        {% empty %}
+            <p>No comments yet!</p>
+        {% endfor %}
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function SendComment(url) {
+    $.post(
+        url, $("#new-comment").serialize(), function (result) {
+            var newComment = document.createElement("div");
+            newComment.className = "card bg-dark text-white";
+
+            var username = document.createElement("p");
+            username.innerHTML = result.username;
+            username.className = "card-header";
+
+            var body = document.createElement("p");
+            body.innerHTML = result.text;
+            body.className = "card-body";
+
+            newComment.appendChild(username);
+            newComment.appendChild(body);
+
+            document.getElementById("comments").appendChild(newComment);
+            document.getElementById("comments").appendChild(
+                document.createElement("br")
+            );
+            document.getElementById("id_text").value = '';
+        }
+    )
+}
+</script>
+{% endblock %}

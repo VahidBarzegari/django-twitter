@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %} Post List {% endblock %}
+{% block content %}
+
+    <div class="card">
+        {% for post in posts %}
+            <a href="{{ post.get_url }}" class="card-body">{{ post.title }}</a>
+        {% endfor %}
+    </div>
+
+{% endblock %}
